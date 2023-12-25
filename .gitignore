@@ -1,0 +1,6 @@
+#pass all Debug staff
+**/x64
+#pass all VS staff
+.vs/
+*/.txt
+
