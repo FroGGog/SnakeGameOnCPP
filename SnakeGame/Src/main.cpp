@@ -6,28 +6,58 @@
 
 enum class Dirs { Left = 1, Right, Up, Down };
 
+const double FPS{ 0.003 }; //updates per period of time
+const int FIELDSIZE{ 100 };//all gamefield size
+const int ROWCUT{ 20 };//get field into new line. = FIELDSIZE / N 
+
 class Head {
 
 public:
-    short direction_x{ 1 };
+    short direction_x{ 0 };
     short saved_x{ 0 };
     char playerChar{ 'X' };
-    short vert_speed{ 20 };
+    short vert_speed{ ::ROWCUT };
     
     Dirs dir{ Dirs::Right };
 
-    short lenght{ 3 };
+    short lenght{ 1 };
 
     void Move(short dir) {
-        if (direction_x + dir >= 100 || direction_x + dir < 0) {
-            return;
+        if (direction_x + dir >= ::FIELDSIZE) {
+            if (this->dir == Dirs::Right) {
+                direction_x = 0;
+                saved_x = ::FIELDSIZE - 1;
+                return;
+            }
+            else if (this->dir == Dirs::Down) {
+                saved_x = direction_x;
+                direction_x = direction_x % 10;
+                return;
+            }
+            else {
+                return;
+            }
         }
-        saved_x = direction_x;
-        direction_x += dir;
-    }
-
-    void PrintInfo() {
-        std::cout << "x : " << direction_x << '\n';
+        else if (direction_x + dir < 0) {
+            if (this->dir == Dirs::Left) {
+                direction_x = ::FIELDSIZE - 1;
+                saved_x = 0;
+                return;
+            }
+            else if (this->dir == Dirs::Up) {
+                saved_x = direction_x;
+                direction_x += ( ( ::FIELDSIZE / ROWCUT) - 1 ) * ROWCUT;
+                return;
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            saved_x = direction_x;
+            direction_x += dir;
+        }
+        
     }
 
 };
@@ -61,11 +91,10 @@ public:
 };
 
 
-
 void printGameField(std::vector<char> gameField){
 	system("cls");
     for (short i{ 0 }; i < gameField.size(); i++) {
-        if (i!= 0 && i % 20 == 0) {
+        if (i!= 0 && i % ::ROWCUT == 0) {
             std::cout << "\n";
         }
         std::cout << gameField[i];
@@ -104,7 +133,7 @@ bool Input(Head &player)
 bool Update(std::chrono::system_clock::time_point tp) {
     auto time_check = std::chrono::system_clock::now();
     std::chrono::duration<float> timeToUPD{ (time_check - tp) / 60 };
-    if (timeToUPD.count() > 0.001) {
+    if (timeToUPD.count() > ::FPS) {
         return true;
     }
     return false;
@@ -122,12 +151,11 @@ int main() {
     Body part4{ part3 };
     Body part5{ part4 };
 
-    std::vector<Body> SnakeBody{part1, part2, part3, part4, part5};
+    std::vector<Body> SnakeBody{part1};
 
-	std::vector<char> gameField(100, '*');
-    gameField[1] = player.playerChar;
+	std::vector<char> gameField(::FIELDSIZE, '*');
+    gameField[0] = player.playerChar;
 
-	printGameField(gameField);
     while (true) {
         
         if (Update(time_start)) {
@@ -149,10 +177,10 @@ int main() {
                     break;
                 }
                 gameField[player.direction_x] = player.playerChar;
-                if (player.lenght == 1) {
+                if (player.lenght == 0) {
                     gameField[player.saved_x] = '*';
                 }
-                for (int i{ 0 }; i < SnakeBody.size(); i++) {
+                for (int i{ 0 }; i < player.lenght; i++) {
                     if (i == 0) {
                         SnakeBody[i].UpdatePos(player, gameField);
                     }
