@@ -12,6 +12,12 @@ Change global var "FIELDSIZE" and "ROWCUT" - to edit your game field sizes.
 
 
 ## Updates
+
+UPD (V1.0.2)
+* Added fruits sturct
+* Added tail mechanics
+* Added growing mechanincs
+
 UPD (V1.0.1)
 * Added snake going through walls mechanic 
 * Bug fix
